@@ -1,8 +1,14 @@
 pipeline {
     agent any
 
-    stages {
+    environment {
+        DB_URL = credentials('mysql-url')
+        DB_USER = credentials('mysql-username')
+        DB_PASS = credentials('mysql-password')
+        JWT_SECRET = credentials('jwt-secret')
+    }
 
+    stages {
         stage('Pull Source') {
             steps {
                 checkout scm
@@ -18,9 +24,7 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                sh """
-                    docker build -t infra-demo .
-                """
+                sh "docker build -t infra-demo ."
             }
         }
 
@@ -40,11 +44,11 @@ pipeline {
                       --name infra-demo \
                       --network infra-net \
                       -p 8080:8080 \
-                      -e SPRING_DATASOURCE_URL="jdbc:mysql://mysql:3306/wooriLearn?serverTimezone=Asia/Seoul&characterEncoding=UTF-8" \
-                      -e SPRING_DATASOURCE_USERNAME=root \
-                      -e SPRING_DATASOURCE_PASSWORD=1234 \
-                      -e SPRING_JPA_HIBERNATE_DDL_AUTO=update \
-                      -e SPRING_JWT_SECRET="1nGmLQMnCQri6kT7jCy0rSzzcAJNR8BoZzDYr/tcVTnwZ/173LuUX3gAwZlI6NRExH0CffzkizyE75VX1Mqw7w==" \
+                      -e SPRING_PROFILES_ACTIVE=dev \
+                      -e SPRING_DATASOURCE_URL=$DB_URL \
+                      -e SPRING_DATASOURCE_USERNAME=$DB_USER \
+                      -e SPRING_DATASOURCE_PASSWORD=$DB_PASS \
+                      -e SPRING_JWT_SECRET=$JWT_SECRET \
                       infra-demo
                 """
             }
