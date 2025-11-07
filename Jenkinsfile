@@ -4,7 +4,7 @@ pipeline {
     environment {
         APP_NAME = "infra-demo"
         PORT = "8080"
-        JWT_SECRET = "abcd1234"   // 실 서비스에서는 Jenkins Credentials 사용해야 함!
+        JWT_SECRET = "1nGmLQMnCQri6kT7jCy0rSzzcAJNR8BoZzDYr/tcVTnwZ/173LuUX3gAwZlI6NRExH0CffzkizyE75VX1Mqw7w=="
     }
 
     stages {
@@ -40,7 +40,7 @@ pipeline {
                 sh """
                 docker run -d --name $APP_NAME \
                     -p $PORT:$PORT \
-                    -e spring.jwt.secret=$JWT_SECRET \
+                    -e SPRING_JWT_SECRET="$JWT_SECRET" \
                     $APP_NAME
                 """
             }
@@ -49,11 +49,10 @@ pipeline {
 
     post {
         success {
-            echo "Deployment Successful! Running on port $PORT"
+            echo "Deployment Successful! App running on http://localhost:$PORT"
         }
         failure {
-            echo "Deployment Failed. Check logs."
+            echo "Deployment Failed. Check docker logs."
         }
     }
-}
 
