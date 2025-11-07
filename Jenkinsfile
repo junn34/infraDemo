@@ -40,7 +40,10 @@ pipeline {
                       --name infra-demo \
                       --network infra-net \
                       -p 8080:8080 \
-                      -e SPRING_PROFILES_ACTIVE=dev \
+                      -e SPRING_DATASOURCE_URL="jdbc:mysql://mysql:3306/wooriLearn?serverTimezone=Asia/Seoul&characterEncoding=UTF-8" \
+                      -e SPRING_DATASOURCE_USERNAME=root \
+                      -e SPRING_DATASOURCE_PASSWORD=1234 \
+                      -e SPRING_JPA_HIBERNATE_DDL_AUTO=update \
                       -e SPRING_JWT_SECRET="1nGmLQMnCQri6kT7jCy0rSzzcAJNR8BoZzDYr/tcVTnwZ/173LuUX3gAwZlI6NRExH0CffzkizyE75VX1Mqw7w==" \
                       infra-demo
                 """
