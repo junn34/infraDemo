@@ -1,0 +1,29 @@
+version: '3.8'
+
+services:
+  mysql:
+    image: mysql:8.0
+    container_name: mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1234
+      MYSQL_DATABASE: woorilearn
+    ports:
+      - "3307:3306"
+    networks:
+      - infra-net
+
+  jenkins:
+    image: jenkins-with-docker
+    container_name: jenkins
+    restart: always
+    ports:
+      - "8081:8080"
+      - "50000:50000"
+    networks:
+      - infra-net
+
+networks:
+  infra-net:
+    external: true
+
