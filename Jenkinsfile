@@ -1,49 +1,58 @@
 pipeline {
     agent any
 
+    environment {
+        APP_NAME = "infra-demo"
+        PORT = "8080"
+        JWT_SECRET = "abcd1234"   // 실 서비스에서는 Jenkins Credentials 사용해야 함!
+    }
+
     stages {
 
-        stage('Pull Source') {
+        stage('Checkout Source') {
             steps {
                 checkout scm
             }
         }
 
-        stage('Set Gradle Permission') {
-            steps {
-                sh 'chmod +x ./gradlew'
-            }
-        }
-
         stage('Build JAR') {
             steps {
+                sh 'chmod +x gradlew'
                 sh './gradlew clean build -x test'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    sh 'docker build -t infra-demo .'
-                }
+                sh 'docker build -t $APP_NAME .'
             }
         }
 
         stage('Stop & Remove Old Container') {
             steps {
-                script {
-                    sh 'docker stop infra-demo || true'
-                    sh 'docker rm infra-demo || true'
-                }
+                sh 'docker stop $APP_NAME || true'
+                sh 'docker rm $APP_NAME || true'
             }
         }
 
         stage('Run New Container') {
             steps {
-                script {
-                    sh 'docker run -d -p 8080:8080 --name infra-demo \ -e spring.jwt.secret=qwe123 \ infra-demo'
-                }
+                sh """
+                docker run -d --name $APP_NAME \
+                    -p $PORT:$PORT \
+                    -e spring.jwt.secret=$JWT_SECRET \
+                    $APP_NAME
+                """
             }
+        }
+    }
+
+    post {
+        success {
+            echo "Deployment Successful! Running on port $PORT"
+        }
+        failure {
+            echo "Deployment Failed. Check logs."
         }
     }
 }
