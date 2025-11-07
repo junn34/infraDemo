@@ -41,7 +41,7 @@ pipeline {
         stage('Run New Container') {
             steps {
                 script {
-                    sh 'docker run -d -p 8080:8080 --name infra-demo infra-demo'
+                    sh 'docker run -d -p 8080:8080 --name infra-demo \ -e spring.jwt.secret=qwe123 \ infra-demo'
                 }
             }
         }
