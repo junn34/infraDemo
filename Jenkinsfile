@@ -2,6 +2,7 @@ pipeline {
     agent any
 
     stages {
+
         stage('Pull Source') {
             steps {
                 checkout scm
@@ -17,37 +18,32 @@ pipeline {
 
         stage('Build Docker Image') {
             steps {
-                script {
-                    sh """
-                        docker build --no-cache -t infra-demo .
-                    """
-                }
+                sh """
+                    docker build -t infra-demo .
+                """
             }
         }
 
         stage('Stop Old Container') {
             steps {
-                script {
-                    sh """
-                        docker stop infra-demo || true
-                        docker rm infra-demo || true
-                    """
-                }
+                sh """
+                    docker stop infra-demo || true
+                    docker rm infra-demo || true
+                """
             }
         }
 
         stage('Run New Container') {
             steps {
-                script {
-                    sh """
-                        docker run -d \
-                          --name infra-demo \
-                          --network infra-net \
-                          -p 8080:8080 \
-                          -e SPRING_PROFILES_ACTIVE=dev \
-                          infra-demo
-                    """
-                }
+                sh """
+                    docker run -d \
+                      --name infra-demo \
+                      --network infra-net \
+                      -p 8080:8080 \
+                      -e SPRING_PROFILES_ACTIVE=dev \
+                      -e SPRING_JWT_SECRET="1nGmLQMnCQri6kT7jCy0rSzzcAJNR8BoZzDYr/tcVTnwZ/173LuUX3gAwZlI6NRExH0CffzkizyE75VX1Mqw7w==" \
+                      infra-demo
+                """
             }
         }
     }
