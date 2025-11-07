@@ -19,7 +19,7 @@ pipeline {
             steps {
                 script {
                     sh """
-                        docker build -t infra-demo .
+                        docker build --no-cache -t infra-demo .
                     """
                 }
             }
@@ -44,6 +44,7 @@ pipeline {
                           --name infra-demo \
                           --network infra-net \
                           -p 8080:8080 \
+                          -e SPRING_PROFILES_ACTIVE=dev \
                           infra-demo
                     """
                 }
