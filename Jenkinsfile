@@ -49,10 +49,11 @@ pipeline {
 
     post {
         success {
-            echo "Deployment Successful! App running on http://localhost:$PORT"
+            echo "✅ Deployment Successful! App running on http://localhost:$PORT"
         }
         failure {
-            echo "Deployment Failed. Check docker logs."
+            echo "❌ Deployment Failed. Check docker logs."
         }
     }
+}
 
