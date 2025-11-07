@@ -1,15 +1,8 @@
 pipeline {
     agent any
 
-    environment {
-        APP_NAME = "infra-demo"
-        PORT = "8080"
-        JWT_SECRET = "1nGmLQMnCQri6kT7jCy0rSzzcAJNR8BoZzDYr/tcVTnwZ/173LuUX3gAwZlI6NRExH0CffzkizyE75VX1Mqw7w=="
-    }
-
     stages {
-
-        stage('Checkout Source') {
+        stage('Pull Source') {
             steps {
                 checkout scm
             }
@@ -17,42 +10,44 @@ pipeline {
 
         stage('Build JAR') {
             steps {
-                sh 'chmod +x gradlew'
+                sh 'chmod +x ./gradlew'
                 sh './gradlew clean build -x test'
             }
         }
 
         stage('Build Docker Image') {
             steps {
-                sh 'docker build -t $APP_NAME .'
+                script {
+                    sh """
+                        docker build -t infra-demo .
+                    """
+                }
             }
         }
 
-        stage('Stop & Remove Old Container') {
+        stage('Stop Old Container') {
             steps {
-                sh 'docker stop $APP_NAME || true'
-                sh 'docker rm $APP_NAME || true'
+                script {
+                    sh """
+                        docker stop infra-demo || true
+                        docker rm infra-demo || true
+                    """
+                }
             }
         }
 
         stage('Run New Container') {
             steps {
-                sh """
-                docker run -d --name $APP_NAME \
-                    -p $PORT:$PORT \
-                    -e SPRING_JWT_SECRET="$JWT_SECRET" \
-                    $APP_NAME
-                """
+                script {
+                    sh """
+                        docker run -d \
+                          --name infra-demo \
+                          --network infra-net \
+                          -p 8080:8080 \
+                          infra-demo
+                    """
+                }
             }
-        }
-    }
-
-    post {
-        success {
-            echo "✅ Deployment Successful! App running on http://localhost:$PORT"
-        }
-        failure {
-            echo "❌ Deployment Failed. Check docker logs."
         }
     }
 }
